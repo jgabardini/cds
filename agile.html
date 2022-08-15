@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8"/>
+    <title>Agile product development</title>
+    <script>
+      let step;
+      function init() {
+        step = 0;
+        setTimeout(() => {draw()}, 500 );
+      }
+
+      function draw() {
+        const canvas = document.getElementById('canvas');
+        if (canvas.getContext) {
+          const ctx = canvas.getContext('2d');
+
+          if (step == 0) {
+            ctx.clearRect(0, 0, 150, 150);
+            ctx.translate(75, 75);
+          } else {
+            ctx.beginPath();
+            ctx.moveTo(0, (step - 1) * 5);
+            ctx.lineTo(0, step * 5);
+            ctx.stroke();
+          }
+          step++;
+
+          if (step < 15) {
+            setTimeout(() => {draw()}, 500 );
+          }
+        }
+      }
+    </script>
+    <style>
+      canvas { border: 1px solid black; }
+    </style>
+  </head>
+  <body onload="init();">
+    <canvas id="canvas" width="150" height="150"></canvas>
+  </body>
+</html>
