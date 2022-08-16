@@ -4,16 +4,16 @@ class Product {
     this.target = target;
   }
   move() {
-    // console.log(`target ${this.target.x} ${this.target.y}`);
-    // console.log(`pos ${this.position.x} ${this.position.y}`);
-    // console.log(`inc ${this.increment(this.target.x, this.position.x)} ${this.increment(this.target.y, this.position.y)}`);
-    this.position.x += this.increment(this.target.x, this.position.x);
-    this.position.y += this.increment(this.target.y, this.position.y);
+    const incr = this.increment(this.target.x - this.position.x, this.target.y - this.position.y);
+    this.position.x += incr.x;
+    this.position.y += incr.y;
   }
-  increment(to, from) {
+  increment(delta_x, delta_y) {
     const max_incr = 6;
-    const dif = to - from;
-    return Math.min(Math.abs(dif), max_incr) * Math.sign(dif);
+    const phi = Math.atan2(delta_y, delta_x);
+    const r = Math.min( Math.sqrt(delta_x**2 + delta_y**2), max_incr);
+
+    return { x: r * Math.cos(phi), y: r * Math.sin(phi) };
   }
 }
 
@@ -25,7 +25,7 @@ class Target {
     this.phi = Math.atan2(y, x);
   }
   move() {
-    this.phi += 0.06;
+    this.phi += 0.05;
     this.x = this.r * Math.cos(this.phi);
     this.y = this.r * Math.sin(this.phi);
   }
@@ -51,8 +51,6 @@ function draw() {
       ctx.translate(75, 75);
     } else {
       ctx.beginPath();
-      // ctx.moveTo(0, (step - 1) * 5);
-      // ctx.lineTo(0, step * 5);
       ctx.moveTo(product.position.x, product.position.y);
       product.move();
       ctx.lineTo(product.position.x, product.position.y);
