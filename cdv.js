@@ -1,12 +1,18 @@
 class Product {
   constructor(target) {
+    this.last = { x: 0, y: 0 };
     this.position = { x: 0, y: 0 };
     this.target = target;
+    this.step = 0;
   }
   move() {
     const incr = this.increment(this.target.x - this.position.x, this.target.y - this.position.y);
+    this.last.x = this.position.x;
+    this.last.y = this.position.y;
     this.position.x += incr.x;
     this.position.y += incr.y;
+    this.step++;
+
   }
   increment(delta_x, delta_y) {
     const max_incr = 6;
@@ -31,13 +37,11 @@ class Target {
   }
 }
 
-let step;
 let product;
 let target;
 function init() {
   target =  new Target(0, -75);
   product = new Product(target);
-  step = 0;
   setTimeout(() => {draw()}, 500 );
 }
 
@@ -46,13 +50,12 @@ function draw() {
   if (canvas.getContext) {
     const ctx = canvas.getContext('2d');
 
-    if (step == 0) {
+    if (product.step == 0) {
       ctx.clearRect(0, 0, 150, 150);
       ctx.translate(75, 75);
     } else {
       ctx.beginPath();
-      ctx.moveTo(product.position.x, product.position.y);
-      product.move();
+      ctx.moveTo(product.last.x, product.last.y);
       ctx.lineTo(product.position.x, product.position.y);
       ctx.stroke();
       ctx.beginPath();
@@ -60,9 +63,9 @@ function draw() {
       ctx.fillStyle = 'green';
       ctx.fill();       
     }
-    step++;
+    product.move();
     
-    if (step < 30 && 1<(Math.abs(product.position.x - target.x) + Math.abs(product.position.y - target.y)) ) {
+    if (product.step < 30 && 1<(Math.abs(product.position.x - target.x) + Math.abs(product.position.y - target.y)) ) {
       target.move();
       setTimeout(() => {draw()}, 500 );
     }
