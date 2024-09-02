@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product-Target Visualization</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        canvas { border: 1px solid #ddd; }
+        .controls { margin-top: 20px; }
+        button { margin-right: 10px; }
+        input[type="number"] { 
+            width: 3em; 
+            padding: 2px;
+            margin-right: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Product-Target Visualization</h1>
+    <canvas id="canvas" width="150" height="150"></canvas>
+    <div class="controls">
+      <button onclick="initAndRun(6, 6)">Lento (6, 6)</button>
+      <button onclick="initAndRun(3, 6)">Ideal (3, 6)</button>
+      <button onclick="initAndRun(parseFloat(document.getElementById('targetSpeed').value), parseFloat(document.getElementById('productSpeed').value))">Otro</button>
+      <input type="number" id="targetSpeed" placeholder="Velocidad del objetivo" value="3" step="0.2">
+        <input type="number" id="productSpeed" placeholder="Velocidad del producto" value="6" step="0.2">
+    </div>
+
+    <script>
+    // Your existing JavaScript code here
+    class Product {
+      constructor(target, speed) {
+        this.last = { x: 0, y: 0 };
+        this.position = { x: 0, y: 0 };
+        this.target = target;
+        this.step = 0;
+        this.speed = speed;
+      }
+      move() {
+        const incr = this.increment(this.target.x - this.position.x, this.target.y - this.position.y);
+        this.last.x = this.position.x;
+        this.last.y = this.position.y;
+        this.position.x += incr.x;
+        this.position.y += incr.y;
+        this.step++;
+      }
+      increment(delta_x, delta_y) {
+        const phi = Math.atan2(delta_y, delta_x);
+        const r = Math.min( Math.sqrt(delta_x**2 + delta_y**2), this.speed);
+        return { x: r * Math.cos(phi), y: r * Math.sin(phi) };
+      }
+    }
+
+    class Target {
+      constructor(x, y, speed) {
+        this.x = x;
+        this.y = y;
+        this.r = Math.sqrt(x**2 + y**2);
+        this.phi = Math.atan2(y, x);
+        this.speed = speed;
+      }
+      move() {
+        this.phi += this.speed;
+        this.x = this.r * Math.cos(this.phi);
+        this.y = this.r * Math.sin(this.phi);
+      }
+    }
+
+    let product;
+    let target;
+    let animationId;
+
+    function init(target_speed, product_speed) {
+      target =  new Target(0, -75, target_speed / 180 * Math.PI);
+      product = new Product(target, product_speed);
+      setTimeout(() => {draw()}, 500 );
+    }
+
+    function draw() {
+      const canvas = document.getElementById('canvas');
+      if (canvas.getContext) {
+        const ctx = canvas.getContext('2d');
+
+        if (product.step == 0) {
+          ctx.setTransform(1, 0, 0, 1, 0, 0);
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          ctx.translate(75, 75);
+        }else {
+          ctx.beginPath();
+          ctx.moveTo(product.last.x, product.last.y);
+          ctx.lineTo(product.position.x, product.position.y);
+          ctx.stroke();
+          ctx.beginPath();
+          ctx.arc(target.x, target.y, 2, 0, Math.PI * 2);
+          ctx.fillStyle = 'green';
+          ctx.fill();       
+        }
+        target.move();
+        product.move();
+        
+        if (product.step < 30 && 1<(Math.abs(product.position.x - target.x) + Math.abs(product.position.y - target.y)) ) {
+          animationId = setTimeout(() => {
+          requestAnimationFrame(draw);
+        }, 200);
+        }
+      }
+    }
+
+
+    function initAndRun(target_speed, product_speed) {
+      if (animationId) {
+        clearTimeout(animationId);
+      }
+      init(target_speed, product_speed);
+      requestAnimationFrame(draw);
+    }
+
+    // Initialize with default values
+    initAndRun(3, 6);    </script>
+</body>
+</html>

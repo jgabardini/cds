@@ -1,9 +1,10 @@
 class Product {
-  constructor(target) {
+  constructor(target, speed) {
     this.last = { x: 0, y: 0 };
     this.position = { x: 0, y: 0 };
     this.target = target;
     this.step = 0;
+    this.speed = speed;
   }
   move() {
     const incr = this.increment(this.target.x - this.position.x, this.target.y - this.position.y);
@@ -15,23 +16,23 @@ class Product {
 
   }
   increment(delta_x, delta_y) {
-    const max_incr = 6;
     const phi = Math.atan2(delta_y, delta_x);
-    const r = Math.min( Math.sqrt(delta_x**2 + delta_y**2), max_incr);
+    const r = Math.min( Math.sqrt(delta_x**2 + delta_y**2), this.speed);
 
     return { x: r * Math.cos(phi), y: r * Math.sin(phi) };
   }
 }
 
 class Target {
-  constructor(x, y) {
+  constructor(x, y, speed) {
     this.x = x;
     this.y = y;
     this.r = Math.sqrt(x**2 + y**2);
     this.phi = Math.atan2(y, x);
+    this.speed = speed;
   }
   move() {
-    this.phi += 0.05;
+    this.phi += this.speed;
     this.x = this.r * Math.cos(this.phi);
     this.y = this.r * Math.sin(this.phi);
   }
@@ -39,9 +40,12 @@ class Target {
 
 let product;
 let target;
-function init() {
-  target =  new Target(0, -75);
-  product = new Product(target);
+// init(9, 6); // too slow
+// init(3, 6); // ideal
+function init(target_speed, product_speed) {
+  target =  new Target(0, -75, target_speed / 180 * Math.PI);
+  // fixed_target =  new Target(0, -75, 0);
+  product = new Product(target, product_speed);
   setTimeout(() => {draw()}, 500 );
 }
 
@@ -63,11 +67,11 @@ function draw() {
       ctx.fillStyle = 'green';
       ctx.fill();       
     }
+    target.move();
     product.move();
     
     if (product.step < 30 && 1<(Math.abs(product.position.x - target.x) + Math.abs(product.position.y - target.y)) ) {
-      target.move();
-      setTimeout(() => {draw()}, 500 );
+      setTimeout(() => {draw()}, 200 );
     }
   }
 }
