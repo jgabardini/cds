@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Product-Target Visualization</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
+    <!--script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script-->
     <style>
         body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
         canvas { border: 1px solid #ddd; }
@@ -21,11 +21,17 @@
     <h1>Product-Target Visualization</h1>
     <canvas id="canvas" width="150" height="150"></canvas>
     <div class="controls">
-      <button onclick="initAndRun(6, 6)">Lento (6, 6)</button>
-      <button onclick="initAndRun(3, 6)">Ideal (3, 6)</button>
-      <button onclick="initAndRun(parseFloat(document.getElementById('targetSpeed').value), parseFloat(document.getElementById('productSpeed').value))">Otro</button>
+      <button onclick="initAndRun(6, 6, 30)">Lento (6, 6)</button>
+      <button onclick="initAndRun(3, 6, 30)">Ideal (3, 6)</button>
+      <button onclick="initAndRun(
+        parseFloat(document.getElementById('targetSpeed').value),
+        parseFloat(document.getElementById('productSpeed').value),
+        parseInt(document.getElementById('maxIterations').value)
+      )">Otro</button>
       <input type="number" id="targetSpeed" placeholder="Velocidad del objetivo" value="3" step="0.2">
-        <input type="number" id="productSpeed" placeholder="Velocidad del producto" value="6" step="0.2">
+      <input type="number" id="productSpeed" placeholder="Velocidad del producto" value="6" step="0.2">
+      <label for="maxIterations">Iteraciones máx.:</label>
+      <input type="number" id="maxIterations" value="30" step="1" min="1">
     </div>
 
     <script>
@@ -71,11 +77,13 @@
     let product;
     let target;
     let animationId;
+    let maxIterations;
 
-    function init(target_speed, product_speed) {
+    function init(target_speed, product_speed, max_iterations) {
       target =  new Target(0, -75, target_speed / 180 * Math.PI);
       product = new Product(target, product_speed);
-      setTimeout(() => {draw()}, 500 );
+      maxIterations = max_iterations;
+      // setTimeout(() => {draw()}, 200 );
     }
 
     function draw() {
@@ -100,7 +108,7 @@
         target.move();
         product.move();
         
-        if (product.step < 30 && 1<(Math.abs(product.position.x - target.x) + Math.abs(product.position.y - target.y)) ) {
+        if (product.step < maxIterations && 1<(Math.abs(product.position.x - target.x) + Math.abs(product.position.y - target.y)) ) {
           animationId = setTimeout(() => {
           requestAnimationFrame(draw);
         }, 200);
@@ -109,15 +117,15 @@
     }
 
 
-    function initAndRun(target_speed, product_speed) {
+    function initAndRun(target_speed, product_speed, max_iterations) {
       if (animationId) {
         clearTimeout(animationId);
       }
-      init(target_speed, product_speed);
+      init(target_speed, product_speed, max_iterations);
       requestAnimationFrame(draw);
     }
 
     // Initialize with default values
-    initAndRun(3, 6);    </script>
+    initAndRun(3, 6, 30);    </script>
 </body>
 </html>
